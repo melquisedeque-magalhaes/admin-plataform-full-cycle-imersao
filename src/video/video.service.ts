@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateVideoDto } from './dto/create-video-dto'
 import { UpdateVideoDto } from './dto/update-video-dto'
 import { PrismaService } from 'src/prisma.service'
@@ -102,6 +102,16 @@ export class VideoService {
     renameSync(file.path, chunkPath)
 
     if (parseInt(chunkNumber, 10) === parseInt(totalChunks, 10)) {
+      const findVideo = await this.prismaService.video.findUnique({
+        where: {
+          id: videoId,
+        },
+      })
+
+      if (!findVideo) {
+        throw new NotFoundException('video não encontrado!')
+      }
+
       const video = await this.prismaService.video.update({
         where: {
           id: videoId,
