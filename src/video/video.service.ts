@@ -12,6 +12,7 @@ interface UploadProps {
   file: Express.Multer.File
   totalChunks: string
   uploadDir: string
+  videoId: string
 }
 
 @Injectable()
@@ -82,7 +83,14 @@ export class VideoService {
     return deleteVideo
   }
 
-  upload({ chunkNumber, file, fileName, totalChunks, uploadDir }: UploadProps) {
+  async upload({
+    chunkNumber,
+    file,
+    fileName,
+    totalChunks,
+    uploadDir,
+    videoId,
+  }: UploadProps) {
     const videoDir = join(uploadDir, fileName)
 
     if (!existsSync(videoDir)) {
@@ -94,7 +102,16 @@ export class VideoService {
     renameSync(file.path, chunkPath)
 
     if (parseInt(chunkNumber, 10) === parseInt(totalChunks, 10)) {
-      return { message: 'Upload completo' }
+      const video = await this.prismaService.video.update({
+        where: {
+          id: videoId,
+        },
+        data: {
+          status: 'UPLOADED_STARTED',
+        },
+      })
+
+      return { message: 'Upload completo', video }
     }
 
     return { message: `Chunk ${chunkNumber} do vídeo ${fileName} recebido` }

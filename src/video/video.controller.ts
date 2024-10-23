@@ -18,6 +18,8 @@ import { updateVideo, UpdateVideoDto } from './dto/update-video-dto'
 import { ZodValidationPipe } from 'src/pipe/zod-validation-pipe'
 import { FileInterceptor } from '@nest-lab/fastify-multer'
 import { existsSync, mkdirSync } from 'fs'
+import { uploadVideo } from './dto/upload-video-dto'
+import { fromZodError } from 'zod-validation-error'
 
 @Controller('video')
 export class VideoController {
@@ -63,7 +65,25 @@ export class VideoController {
     @Body('chunkNumber') chunkNumber: string,
     @Body('totalChunks') totalChunks: string,
     @Body('fileName') fileName: string,
+    @Body('videoId') videoId: string,
   ) {
+    const formDataInfo = {
+      chunkNumber,
+      totalChunks,
+      fileName,
+      videoId,
+    }
+
+    const schema = uploadVideo.safeParse(formDataInfo)
+
+    if (!schema.success) {
+      throw new BadRequestException({
+        message: 'Validation failed',
+        statusCode: 400,
+        errors: fromZodError(schema.error),
+      })
+    }
+
     if (!file) {
       throw new BadRequestException('No file uploaded')
     }
@@ -74,6 +94,7 @@ export class VideoController {
       fileName,
       totalChunks,
       uploadDir: this.uploadDir,
+      videoId,
     })
   }
 }
