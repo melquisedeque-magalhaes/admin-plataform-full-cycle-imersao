@@ -7,10 +7,10 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { registerSchema } from './schemas/register-schema'
+import { registerSchema } from './dto/register.dto'
 import { ZodValidationPipe } from 'src/pipe/zod-validation-pipe'
 import { z } from 'zod'
-import { authenticateSchema } from './schemas/authenticate-schema'
+import { authenticateSchema } from './dto/authenticate.dto'
 import { InvalidCredentials } from 'src/errors/invalid-credential-errors'
 
 type CreateUserDTO = z.infer<typeof registerSchema>

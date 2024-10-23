@@ -17,4 +17,42 @@ model User {
   id       String @id @default(uuid())
   email    String @unique
   password String
+
+  updated_at DateTime @default(now())
+  created_at DateTime @default(now())
+}
+
+enum StatusVideo {
+  UPLOADED_STARTED
+  UPLOADED_NOT_STARTED
+  PROCESS_STARTED
+  PROCESS_FINISHED
+  PROCESS_ERROR
+}
+
+model Video {
+  id           String      @id @default(uuid())
+  title        String
+  description  String
+  thunbnailUrl String?
+  slug         String      @unique
+  is_publish   Boolean     @default(false)
+  count_likes  Int         @default(0)
+  count_views  Int         @default(0)
+  url          String?
+  status       StatusVideo @default(UPLOADED_NOT_STARTED)
+  updated_at   DateTime    @default(now())
+  created_at   DateTime    @default(now())
+
+  tags Tag[]
+}
+
+model Tag {
+  id      String  @id @default(uuid())
+  name    String  @unique
+  Video   Video?  @relation(fields: [videoId], references: [id])
+  videoId String?
+
+  updated_at DateTime @default(now())
+  created_at DateTime @default(now())
 }
